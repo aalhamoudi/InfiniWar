@@ -1,4 +1,4 @@
-// © Abdulrahman Alhamoudi, 2016 - All rights reserved
+// Copyright Abdulrahman Alhamoudi, 2016 - All rights reserved.
 
 #include "InfiniEx.h"
 #include "InfiniGameMode.h"
@@ -7,10 +7,10 @@
 
 AInfiniGameMode::AInfiniGameMode()
 {
-	// use our custom PlayerController class
+	// use custom PlayerController class
 	PlayerControllerClass = AInfiniPlayerController::StaticClass();
 
-	// set default pawn class to our Blueprinted character
+	// set up blueprint
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/Characters/Heros/Knight/Blueprints/InfiniKnightBP"));
 	if (PlayerPawnBPClass.Class != NULL)
 	{

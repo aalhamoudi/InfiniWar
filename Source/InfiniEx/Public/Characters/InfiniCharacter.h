@@ -1,4 +1,4 @@
-// © Abdulrahman Alhamoudi, 2016 - All rights reserved
+// Copyright Abdulrahman Alhamoudi, 2016 - All rights reserved.
 
 #pragma once
 #include "GameFramework/Character.h"
@@ -23,6 +23,7 @@ public:
 	FORCEINLINE class UDecalComponent* GetCursorToWorld() { return CursorToWorld; }
 
 private:
+
 	/** Top down camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* TopDownCameraComponent;

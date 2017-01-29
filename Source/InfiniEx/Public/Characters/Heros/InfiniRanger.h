@@ -13,7 +13,20 @@ class INFINIEX_API AInfiniRanger : public AInfiniHero
 {
 	GENERATED_BODY()
 	
-	
+public:
+	// Character Vitals //	
+	/** Max Mana */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Vitals)
+		float MaxMana;
+
+	/** Mana Regen */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Vitals)
+		float ManaRegen;
+
+	/** Actual Mana */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Vitals)
+		float Mana;
+
 	
 	
 };

@@ -1,4 +1,4 @@
-// © Abdulrahman Alhamoudi, 2016 - All rights reserved
+// Copyright Abdulrahman Alhamoudi, 2016 - All rights reserved.
 
 #include "InfiniEx.h"
 #include "InfiniPlayerController.h"
@@ -6,21 +6,44 @@
 #include "Runtime/Engine/Classes/Components/DecalComponent.h"
 #include "Kismet/HeadMountedDisplayFunctionLibrary.h"
 #include "InfiniCharacter.h"
+#include "InfiniEnemy.h"
+#include "InfiniItem.h"
+#include "InfiniAnimation.h"
 
 AInfiniPlayerController::AInfiniPlayerController()
 {
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
+
+	bEnableClickEvents = true;
+	bEnableTouchEvents = true;
+	bEnableMouseOverEvents = true;
+	bEnableTouchOverEvents = true;
+
+	Hero = Cast<AInfiniHero>(GetPawn());
 }
 
 void AInfiniPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
 
+	
+
 	// keep updating the destination every tick while desired
 	if (bMoveToMouseCursor)
 	{
 		MoveToMouseCursor();
+	}
+
+
+
+	if (Target)
+	{
+		if ((GetPawn()->GetDistanceTo(Target)) > 100.0)
+			SetNewMoveDestination(Target->GetActorLocation());
+		else
+			PlayAttackAnimation();
+
 	}
 }
 
@@ -31,6 +54,12 @@ void AInfiniPlayerController::SetupInputComponent()
 
 	InputComponent->BindAction("SetDestination", IE_Pressed, this, &AInfiniPlayerController::OnSetDestinationPressed);
 	InputComponent->BindAction("SetDestination", IE_Released, this, &AInfiniPlayerController::OnSetDestinationReleased);
+
+	//InputComponent->BindAction("Attack", IE_Pressed, this, &AInfiniPlayerController::Attack);
+	InputComponent->BindAction("PrimaryAbility", IE_Pressed, this, &AInfiniPlayerController::PrimaryAbility);
+	InputComponent->BindAction("SecondaryAbility", IE_Pressed, this, &AInfiniPlayerController::SecondaryAbility);
+	InputComponent->BindAction("UltimateAbility", IE_Pressed, this, &AInfiniPlayerController::UltimateAbility);
+
 
 	// support touch devices 
 	InputComponent->BindTouch(EInputEvent::IE_Pressed, this, &AInfiniPlayerController::MoveToTouchLocation);
@@ -67,6 +96,8 @@ void AInfiniPlayerController::MoveToMouseCursor()
 			// We hit something, move there
 			SetNewMoveDestination(Hit.ImpactPoint);
 		}
+		
+		
 	}
 }
 
@@ -77,9 +108,18 @@ void AInfiniPlayerController::MoveToTouchLocation(const ETouchIndex::Type Finger
 	// Trace to see what is under the touch location
 	FHitResult HitResult;
 	GetHitResultAtScreenPosition(ScreenSpaceLocation, CurrentClickTraceChannel, true, HitResult);
-	if (HitResult.bBlockingHit)
+
+	// Determine if an enemy is clicked on
+	if (HitResult.GetActor()->GetClass()->IsChildOf(AInfiniEnemy::StaticClass()))
+		Attack(HitResult.GetActor());
+
+	// Determine if an item is clicked on
+	else if (HitResult.GetActor()->GetClass()->IsChildOf(AInfiniItem::StaticClass()))
+		PickUp(HitResult.GetActor());
+
+	else if (HitResult.bBlockingHit)
 	{
-		// We hit something, move there
+		Target = NULL;
 		SetNewMoveDestination(HitResult.ImpactPoint);
 	}
 }
@@ -98,6 +138,7 @@ void AInfiniPlayerController::SetNewMoveDestination(const FVector DestLocation)
 			NavSys->SimpleMoveToLocation(this, DestLocation);
 		}
 	}
+
 }
 
 void AInfiniPlayerController::OnSetDestinationPressed()
@@ -110,4 +151,52 @@ void AInfiniPlayerController::OnSetDestinationReleased()
 {
 	// clear flag to indicate we should stop updating the destination
 	bMoveToMouseCursor = false;
+}
+
+
+void AInfiniPlayerController::Attack(AActor* Enemy)
+{
+	Target = Enemy;
+
+	// Move closer if too far
+	if ((GetPawn()->GetDistanceTo(Enemy)) > 120.0)
+		SetNewMoveDestination(Enemy->GetActorLocation());
+
+	
+}
+
+
+void AInfiniPlayerController::PickUp(AActor* Item)
+{
+	if ((GetPawn()->GetDistanceTo(Item)) > 120.0)
+		SetNewMoveDestination(Item->GetActorLocation());
+
+}
+
+void AInfiniPlayerController::PrimaryAbility()
+{
+
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), (Cast<AInfiniHero>(GetPawn()))->PrimaryAbilityParticleSystem->Template, (Cast<AInfiniHero>(GetPawn()))->GetActorLocation(), (Cast<AInfiniHero>(GetPawn()))->GetActorRotation());
+	
+}
+
+void AInfiniPlayerController::SecondaryAbility()
+{
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), (Cast<AInfiniHero>(GetPawn()))->SecondaryAbilityParticleSystem->Template, (Cast<AInfiniHero>(GetPawn()))->GetActorLocation(), (Cast<AInfiniHero>(GetPawn()))->GetActorRotation());
+}
+
+void AInfiniPlayerController::UltimateAbility()
+{
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), (Cast<AInfiniHero>(GetPawn()))->UltimateAbilityParticleSystem->Template, (Cast<AInfiniHero>(GetPawn()))->GetActorLocation(), (Cast<AInfiniHero>(GetPawn()))->GetActorRotation());
+}
+
+void AInfiniPlayerController::PlayAttackAnimation()
+{
+	// Play attack animation
+	AInfiniCharacter* ControlledCharacter = Cast<AInfiniCharacter>(GetPawn());
+	if (ControlledCharacter)
+	{
+		UInfiniAnimation* AnimInstanceRef = Cast<UInfiniAnimation>(ControlledCharacter->GetMesh()->GetAnimInstance());
+		if (AnimInstanceRef) AnimInstanceRef->Attack();
+	}
 }

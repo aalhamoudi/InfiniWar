@@ -1,4 +1,4 @@
-// © Abdulrahman Alhamoudi, 2016 - All rights reserved
+// Copyright Abdulrahman Alhamoudi, 2016 - All rights reserved.
 
 #include "InfiniEx.h"
 

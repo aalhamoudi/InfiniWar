@@ -1,7 +1,8 @@
-// © Abdulrahman Alhamoudi, 2016 - All rights reserved
+// Copyright Abdulrahman Alhamoudi, 2016 - All rights reserved.
 
 #pragma once
 #include "GameFramework/PlayerController.h"
+#include "Characters/Heros/InfiniHero.h"
 #include "InfiniPlayerController.generated.h"
 
 UCLASS()
@@ -15,6 +16,9 @@ public:
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
 	uint32 bMoveToMouseCursor : 1;
+	bool bIsAttacking;
+	AActor* Target;
+	AInfiniHero* Hero;
 
 	// Begin PlayerController interface
 	virtual void PlayerTick(float DeltaTime) override;
@@ -36,6 +40,20 @@ protected:
 	/** Input handlers for SetDestination action. */
 	void OnSetDestinationPressed();
 	void OnSetDestinationReleased();
+
+	/** Handle attack action */
+	void Attack(AActor* Enemy);
+
+	/** Handle pickup */
+	void PickUp(AActor* Item);
+
+	/** Handle abilities */
+	void PrimaryAbility();
+	void SecondaryAbility();
+	void UltimateAbility();
+
+	/** Animations */
+	void PlayAttackAnimation();
 };
 
 

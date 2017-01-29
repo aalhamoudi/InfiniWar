@@ -12,8 +12,22 @@ UCLASS()
 class INFINIEX_API AInfiniEnemy : public AInfiniCharacter
 {
 	GENERATED_BODY()
-	
-	
+public:
+	AInfiniEnemy();
+	virtual void BeginPlay() override;
+
+protected:
+	UFUNCTION()
+		void OnBeginMouseHover(class UPrimitiveComponent* Capsule);
+
+	UFUNCTION()
+		void OnEndMouseHover(class UPrimitiveComponent* Capsule);
+
+	UFUNCTION()
+		void OnClicked(class UPrimitiveComponent* Capsule);
+
+	UFUNCTION()
+		void OnTouchHover(ETouchIndex::Type Index, class AActor* OtherActor);
 	
 	
 };
